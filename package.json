@@ -1,0 +1,14 @@
+{
+  "name": "nws-sovereign-stack",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Nathan Wayne Salles — Node 0x363 website and Termux deployment CLI",
+  "scripts": {
+    "check": "node scripts/check-site.mjs",
+    "build": "node scripts/check-site.mjs",
+    "test": "node scripts/check-site.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

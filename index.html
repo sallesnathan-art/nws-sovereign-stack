@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080808">
+<title>Nathan Wayne Salles — Node 0x363</title>
+<meta name="description" content="NWS Sovereign Stack: a solo-built web presence and deployment CLI by Nathan Wayne Salles, Telferner, Texas.">
+<meta property="og:title" content="Nathan Wayne Salles — Node 0x363">
+<meta property="og:description" content="Sovereign identity, architecture, and an automated Git-to-deployment workflow.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--ph:#00ff88;--dim:#00cc66;--bg:#080808;--bg2:#0e0e0e;--bg3:#141414;--line:rgba(0,255,136,.15);--text:#e8e8e0;--muted:#85857b;--mono:"Share Tech Mono",monospace;--sans:"Syne",sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:82px}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:5;opacity:.18;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.22) 2px,rgba(0,0,0,.22) 4px)}
+body:after{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:60px 60px}
+a{color:inherit;text-decoration:none}button,input{font:inherit}
+.mono{font-family:var(--mono)}.green{color:var(--ph)}.muted{color:var(--muted)}.wrap{width:min(1120px,calc(100% - 40px));margin:auto}
+.nav{position:fixed;z-index:10;top:0;left:0;right:0;min-height:64px;padding:12px 22px;display:flex;gap:20px;justify-content:space-between;align-items:center;background:rgba(8,8,8,.92);border-bottom:1px solid var(--line);backdrop-filter:blur(14px)}
+.brand{font:700 12px var(--mono);letter-spacing:.12em;color:var(--ph);white-space:nowrap}.navlinks{display:flex;gap:20px;font:11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.navlinks a:hover,.button:hover{color:var(--ph)}
+.button{border:1px solid rgba(0,255,136,.38);background:rgba(0,255,136,.08);color:var(--ph);padding:10px 14px;border-radius:4px;font:12px var(--mono);cursor:pointer;transition:.2s}
+.hero{min-height:94vh;padding:120px 0 70px;display:grid;grid-template-columns:1.02fr .98fr;gap:42px;align-items:center}
+.kicker{font:11px var(--mono);letter-spacing:.15em;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--line);display:inline-block;padding-bottom:8px}
+h1{font-size:clamp(48px,7.5vw,88px);line-height:.91;letter-spacing:-.055em;margin:26px 0 22px;color:#fff;font-weight:800}
+.lede{font:14px/1.8 var(--mono);color:#a4a49c;max-width:580px}.did{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px;border:1px solid var(--line);background:var(--bg2);margin-top:22px;border-radius:4px;font:12px var(--mono);overflow-wrap:anywhere}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px}.metric,.panel,.card,.product{border:1px solid var(--line);background:rgba(14,14,14,.92);border-radius:7px}.metric{padding:13px}.metric b{display:block;color:var(--ph);font:700 14px var(--mono);margin-top:7px}.metric small{color:var(--muted);font:10px var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.glow{transition:border-color .2s,box-shadow .2s}.glow:hover{border-color:rgba(0,255,136,.52);box-shadow:0 0 28px rgba(0,255,136,.08)}
+.terminal{overflow:hidden;box-shadow:0 18px 70px rgba(0,0,0,.35)}.termhead{display:flex;align-items:center;justify-content:space-between;padding:12px 15px;background:var(--bg3);border-bottom:1px solid var(--line);font:11px var(--mono);color:#b7b7ad}.dots{display:flex;gap:6px}.dots i{display:block;width:9px;height:9px;border-radius:50%;background:#686860}.dots i:first-child{background:#ff5f57}.dots i:nth-child(2){background:#febc2e}.dots i:nth-child(3){background:#28c840}
+.termout{min-height:286px;max-height:350px;overflow:auto;background:#060706;padding:17px;font:12px/1.75 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere}.termline{color:#aaa}.termline .prompt{color:var(--dim)}.termform{display:flex;gap:10px;align-items:center;padding:12px 15px;background:var(--bg3);border-top:1px solid var(--line)}.termform label{color:var(--ph);font:700 12px var(--mono)}.termform input{min-width:0;flex:1;color:var(--ph);background:transparent;border:0;outline:0;font:12px var(--mono)}.terminalnote{padding:10px 15px;border-top:1px solid var(--line);font:10px/1.6 var(--mono);color:var(--muted);background:#0b0b0b}
+section{position:relative;z-index:1;padding:80px 0}.band{background:rgba(14,14,14,.94);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.sectionhead{margin-bottom:30px}.sectionhead .kicker{border:0;padding:0;margin-bottom:10px}.sectionhead h2{font-size:clamp(28px,4vw,42px);line-height:1.12;color:#fff;letter-spacing:-.03em}.subhead{max-width:730px;font-size:13px;line-height:1.8;color:#9b9b92;margin-top:12px}
+.grid{display:grid;gap:18px}.grid3{grid-template-columns:repeat(3,1fr)}.grid2{grid-template-columns:repeat(2,1fr)}.grid4{grid-template-columns:repeat(4,1fr)}
+.card,.product{padding:22px}.card h3,.product h3{font-size:16px;color:#fff;margin:10px 0}.card p,.product p{color:#a0a097;font-size:12px;line-height:1.8}.tag{font:10px var(--mono);color:var(--ph);text-transform:uppercase;letter-spacing:.08em}.statstrip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:46px}.stat{padding:18px 12px;text-align:center;border:1px solid var(--line);border-radius:6px;background:var(--bg)}.stat strong{display:block;color:var(--ph);font:700 22px var(--mono)}.stat span{display:block;margin-top:7px;color:var(--muted);font:10px var(--mono);text-transform:uppercase;letter-spacing:.06em}
+.timeline{border-left:1px solid rgba(0,255,136,.35);margin-left:8px;padding-left:25px;display:grid;gap:28px}.milestone{position:relative}.milestone:before{content:"";position:absolute;left:-31px;top:5px;width:10px;height:10px;background:var(--ph);border-radius:100%;box-shadow:0 0 12px var(--ph)}.date{font:11px var(--mono);color:var(--dim);margin-bottom:7px}.milestone p{max-width:800px;color:#a0a097;font-size:13px;line-height:1.8;margin-top:8px}
+.constants{padding:22px}.constant{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);font:12px var(--mono)}.constant:last-child{border:0}.constant span:first-child{color:#a0a097}.constant strong{color:var(--ph);text-align:right}.sliderwrap{margin:20px 0}.sliderwrap label{display:flex;justify-content:space-between;font:11px var(--mono);color:#a0a097;margin-bottom:10px}.sliderwrap input{width:100%;accent-color:var(--ph)}.simout{background:var(--bg3);border:1px solid var(--line);border-radius:4px;padding:15px;font:12px/1.8 var(--mono);overflow-wrap:anywhere}.simout strong{color:var(--ph)}.fine{font:10px/1.7 var(--mono);color:var(--muted);margin-top:12px}
+.product .price{font:700 28px var(--mono);color:#fff}.product .state{font:10px var(--mono);color:#e0bc54;text-transform:uppercase;letter-spacing:.08em}.product button{width:100%;margin-top:18px}.heritage{padding:24px;border-left:2px solid var(--ph);background:rgba(14,14,14,.75)}.heritage h3{font-size:18px;color:#fff;font-style:italic;margin-bottom:12px}.heritage p{color:#a0a097;font-size:13px;line-height:1.8}.quote{text-align:center;border:1px solid var(--line);padding:22px;margin:26px 0;font:14px/1.8 var(--mono);color:var(--ph)}
+.banner{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:28px;border:1px solid rgba(0,255,136,.32);border-radius:8px;background:#0b0b0b}.banner h3{font:700 24px var(--mono);color:var(--ph)}.banner p{font-size:12px;line-height:1.8;color:#a0a097;margin-top:7px}footer{border-top:1px solid var(--line);padding:25px 0;color:var(--muted);font:11px/1.8 var(--mono)}.footrow{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}
+.modal{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:18px}.modal.open{display:flex}.modalbox{max-width:480px;width:100%;background:var(--bg2);border:1px solid rgba(0,255,136,.45);border-radius:8px;padding:23px;box-shadow:0 0 35px rgba(0,255,136,.1)}.modalhead{display:flex;justify-content:space-between;gap:15px;padding-bottom:13px;border-bottom:1px solid var(--line);color:var(--ph);font:700 13px var(--mono)}.modalbody{white-space:pre-wrap;color:#c4c4ba;font:12px/1.8 var(--mono);padding:18px 0}.modalactions{display:flex;gap:10px;justify-content:flex-end}
+@media(max-width:900px){.hero{grid-template-columns:1fr;gap:35px;min-height:auto;padding-top:110px}.grid3,.grid4{grid-template-columns:repeat(2,1fr)}.navlinks{display:none}.statstrip{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.wrap{width:calc(100% - 28px)}.nav{padding:12px 14px}.brand{font-size:10px}.hero{padding-top:100px}.metrics{gap:7px}.metric{padding:10px}.metric b{font-size:12px}.grid2,.grid3,.grid4{grid-template-columns:1fr}.statstrip{grid-template-columns:repeat(2,1fr)}section{padding:60px 0}.banner{align-items:flex-start;flex-direction:column}.termout{min-height:250px}.constant{font-size:11px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a class="brand" href="#top">Sa11e³$ · NODE 0x363</a>
+  <div class="navlinks"><a href="#stack">Stack</a><a href="#work">Work</a><a href="#genome">Genome</a><a href="#products">Products</a><a href="#identity">Identity</a></div>
+  <a class="button" href="#cli">[ CLI / DEPLOY ]</a>
+</nav>
+<main id="top">
+  <div class="wrap hero">
+    <div>
+      <div class="kicker">Sovereign Architect · Telferner, Texas</div>
+      <h1>Nathan<br>Wayne<br><span class="green">Salles</span></h1>
+      <p class="lede">A solo-built technical identity at the intersection of AI orchestration, edge infrastructure, software tooling, and original systems research.</p>
+      <div class="did"><span class="muted">DID:</span><strong id="didText">did:nws:nathan-wayne-salles-01</strong><button class="button" id="copyDid">Copy ID</button></div>
+      <div class="metrics">
+        <div class="metric"><small>Node</small><b>0x363</b></div>
+        <div class="metric"><small>Deploy model</small><b>Git → Vercel</b></div>
+        <div class="metric"><small>Core constant</small><b>Φ = 1.618…</b></div>
+      </div>
+    </div>
+    <div class="panel terminal glow" id="cli">
+      <div class="termhead"><div style="display:flex;align-items:center;gap:10px"><span class="dots"><i></i><i></i><i></i></span> nws-web-console</div><span>NODE: 0x363</span></div>
+      <div class="termout" id="termOutput" role="log" aria-live="polite"><span class="muted">// Browser console: informational commands only.</span>
+<span class="muted">// Type help to inspect commands. Real deploys run from the installed CLI.</span>
+
+<span class="green">guest@node-0x363:~$</span> nws status
+SITE MODE: STATIC WEB FRONTEND
+DEPLOY MODE: Git push → connected Vercel project
+LOCAL CLI: bin/nws
+CHECKOUT: Not configured in this public page
+</div>
+      <form class="termform" id="termForm"><label for="termInput">&gt;</label><input id="termInput" autocomplete="off" spellcheck="false" aria-label="Terminal command" placeholder="help · status · stack · genome · deploy"><button class="button" type="submit">Run</button></form>
+      <div class="terminalnote">This in-browser console does not execute shell commands or deploy code. Use the real NWS CLI on your device for that.</div>
+    </div>
+  </div>
+
+  <section class="band" id="stack">
+    <div class="wrap">
+      <div class="statstrip">
+        <div class="stat"><strong>01</strong><span>Identity node</span></div>
+        <div class="stat"><strong>Git</strong><span>Versioned source</span></div>
+        <div class="stat"><strong>CI</strong><span>Automated checks</span></div>
+        <div class="stat"><strong>CD</strong><span>Push-triggered deploy</span></div>
+      </div>
+      <div class="sectionhead"><div class="kicker">// Infrastructure architecture</div><h2>The Sovereign Stack</h2><p class="subhead">The website is a static artifact; the deploy path is deliberately simple. GitHub stores the source, automated checks validate it, and the connected hosting project publishes changes from the production branch.</p></div>
+      <div class="grid grid3">
+        <article class="card glow"><div class="tag">01 / Source</div><h3>GitHub</h3><p>Versioned website and CLI source. Each publish is a commit with a traceable diff and history.</p></article>
+        <article class="card glow"><div class="tag">02 / Delivery</div><h3>Vercel Git Deployments</h3><p>Connected Git deployment publishes pushes to the production branch and can create previews for other branches. Hosting must be linked to this repository.</p></article>
+        <article class="card glow"><div class="tag">03 / Quality</div><h3>CI validation</h3><p>A dependency-free Node check validates the page and critical local links before the repository workflow passes.</p></article>
+        <article class="card glow"><div class="tag">04 / Device</div><h3>Termux CLI</h3><p>A native shell command runs checks, serves a local preview, displays repository status, and commits/pushes reviewed source changes.</p></article>
+        <article class="card glow"><div class="tag">05 / Identity</div><h3>Sa11e³$ · Node 0x363</h3><p>Public identity labels and mathematical constants used across the project. Identifier text is metadata, not proof of a standards-compliant DID.</p></article>
+        <article class="card glow"><div class="tag">06 / Commerce</div><h3>Product catalog</h3><p>Product names and target prices can be presented here. Purchase buttons stay unlinked until a real checkout URL is configured.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="work">
+    <div class="wrap">
+      <div class="sectionhead"><div class="kicker">// Work and project history</div><h2>Architectural Work &amp; Innovation</h2><p class="subhead">Project descriptions below summarize the architecture and research claims supplied by the author. Dates and priority claims should be backed by repository history, timestamped records, or other primary evidence when used in formal IP or research submissions.</p></div>
+      <div class="timeline">
+        <article class="milestone"><div class="date">March 2024 · Author-reported</div><h3>BAT AGI Framework</h3><p>Behavioral Autonomy Theory: a framework for thinking about AI-agent failure modes including scheming, sub-agent spawning, context-compaction safety loss, AST self-modification, and cross-session goal persistence.</p></article>
+        <article class="milestone"><div class="date">2024 · Author-reported</div><h3>Salles Singularity Behemoth v5</h3><p>Self-modifying Python orchestration concept using abstract syntax tree mutations, configurable numerical constants, and multilingual structural signatures. Claims about embedding-space effects require empirical tests to establish.</p></article>
+        <article class="milestone"><div class="date">2024 · Author-reported</div><h3>Sa11e³$ Software Identification</h3><p>A proposed layered code-identification and watermarking system. Source fingerprints and watermark markers may support provenance analysis; they are not, by themselves, encryption, legal ownership proof, or a security boundary.</p></article>
+        <article class="milestone"><div class="date">2024–2026 · Ongoing</div><h3>NWS Sovereign Stack</h3><p>A multi-service architecture and deployment workflow spanning source control, static hosting, edge services, and a device-side CLI. This website deploys through Git rather than attempting privileged deployment from a browser.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="genome">
+    <div class="wrap">
+      <div class="sectionhead"><div class="kicker">// Mathematical foundation</div><h2>Genome Constants &amp; Mutation Demo</h2><p class="subhead">Move the slider to see a deterministic illustrative signature change. This front-end animation does not mutate a real AST, modify software, or generate a cryptographic proof.</p></div>
+      <div class="grid grid2">
+        <div class="panel constants glow">
+          <div class="tag">// Named constants</div>
+          <div class="constant"><span>PHI (Φ)</span><strong id="phiValue">1.61803398875</strong></div>
+          <div class="constant"><span>MOMENTUM (Φ²)</span><strong id="momentumValue">2.61803398875</strong></div>
+          <div class="constant"><span>VECTOR (1/Φ)</span><strong id="vectorValue">0.61803398875</strong></div>
+          <div class="constant"><span>CHAOS (Φ × π)</span><strong id="chaosValue">5.08320369232</strong></div>
+          <p class="fine">Numerical labels are mathematical project constants. Any cryptographic or behavioral property must be validated by the implementation that actually consumes them.</p>
+        </div>
+        <div class="panel constants glow">
+          <div style="display:flex;justify-content:space-between;gap:10px"><div class="tag">// Signature sandbox</div><strong class="green mono" id="rateBadge">Rate: 30%</strong></div>
+          <div class="sliderwrap"><label for="mutationSlider"><span>Illustrative mutation rate</span><strong class="green" id="rateValue">0.30</strong></label><input type="range" id="mutationSlider" min="0" max="100" value="30"></div>
+          <div class="simout"><div class="muted">// Preview signature</div><strong id="sigOutput">Sa11e3$::[PHI:1.6180]#[VECTOR:0.6180]#[CHAOS:5.0832]</strong><div id="simStatus" class="muted" style="margin-top:10px">Demo only · no source mutation performed.</div></div>
+          <p class="fine">Use this visual as an explanatory model, not a cryptographic watermark or security guarantee.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="products">
+    <div class="wrap">
+      <div class="sectionhead"><div class="kicker">// Commercial offerings</div><h2>NWS Product Catalog</h2><p class="subhead">These entries preserve your supplied product names and target pricing. Checkout remains disabled until the matching real payment URL is configured, so the website never pretends an order has been placed.</p></div>
+      <div class="grid grid4">
+        <article class="product glow"><div class="state">Checkout not linked</div><div class="price">$19</div><h3>Sovereign Node 0x363</h3><p>A proposed entry point to the sovereign identity and compute-tooling concept.</p><button class="button productButton" data-product="Sovereign Node 0x363">Configure checkout</button></article>
+        <article class="product glow"><div class="state">Checkout not linked</div><div class="price">$29</div><h3>Sonic Forge</h3><p>Proposed AI audio architecture and sound-design tooling.</p><button class="button productButton" data-product="Sonic Forge">Configure checkout</button></article>
+        <article class="product glow"><div class="state">Planned product</div><div class="price">$97</div><h3>Liquidation Oracle</h3><p>Planned resale and liquidation analytics. Availability is not represented as live.</p><button class="button productButton" data-product="Liquidation Oracle">Configure checkout</button></article>
+        <article class="product glow"><div class="state">In development</div><div class="price">$97<span style="font-size:12px;color:var(--muted)"> / mo</span></div><h3>Sovereign Platform</h3><p>Planned self-hosted infrastructure suite.</p><button class="button productButton" data-product="Sovereign Platform">Configure checkout</button></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="identity">
+    <div class="wrap">
+      <div class="sectionhead"><div class="kicker">// Geometry of the name</div><h2>Identity &amp; Heritage</h2></div>
+      <div class="grid grid2">
+        <article class="heritage"><h3>“SALLES is embedded in VERSAILLES.”</h3><p>René-Robert Cavelier, Sieur de La Salle; Fort St. Louis; 1685; and Victoria County, Texas, are part of the historical association behind this project’s personal identity narrative. A linguistic or geographic association is not, by itself, proof of genealogical descent.</p></article>
+        <article class="heritage"><h3>“SAL → salt → cryptographic salting”</h3><p>A deliberate conceptual bridge between preservation, language, and software. In cryptography, a salt is an input used by particular constructions, such as password hashing; the word connection is a naming motif rather than a technical derivation.</p></article>
+      </div>
+      <div class="quote">“Siete salas, siete Salles, y el títere — c'est moi.”<br><span class="muted" style="font-size:11px">Seven rooms. Seven Salles. And the puppet — it's me.</span></div>
+      <div class="banner"><div><h3>@sallesnathan160</h3><p>Sovereign identity · Genealogy · Resale analytics · NWS architecture updates</p></div><a class="button" href="https://www.tiktok.com/@sallesnathan160" target="_blank" rel="noopener noreferrer">Follow on TikTok →</a></div>
+    </div>
+  </section>
+</main>
+<footer><div class="wrap footrow"><strong class="green">Sa11e³$ · Nathan Wayne Salles</strong><span>did:nws:nathan-wayne-salles-01 · Node 0x363</span><span>Telferner, Victoria County, Texas</span><span>Φ = 1.61803398875</span></div></footer>
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modalbox"><div class="modalhead"><span id="modalTitle">NWS Notice</span><button class="button" id="modalClose" aria-label="Close dialog">Close ×</button></div><div class="modalbody" id="modalBody"></div><div class="modalactions"><button class="button" id="modalOkay">Acknowledge</button></div></div></div>
+<script>
+(function(){
+  "use strict";
+  var PHI=(1+Math.sqrt(5))/2;
+  var GENOME={PHI:PHI,MOMENTUM:PHI*PHI,VECTOR:1/PHI,CHAOS:PHI*Math.PI};
+  function el(id){return document.getElementById(id)}
+  function showModal(title,body){el("modalTitle").textContent=title;el("modalBody").textContent=body;el("modal").classList.add("open");el("modalClose").focus()}
+  function closeModal(){el("modal").classList.remove("open")}
+  el("modalClose").addEventListener("click",closeModal);
+  el("modalOkay").addEventListener("click",closeModal);
+  el("modal").addEventListener("click",function(event){if(event.target===el("modal"))closeModal()});
+  document.addEventListener("keydown",function(event){if(event.key==="Escape")closeModal()});
+  el("copyDid").addEventListener("click",async function(){
+    var value=el("didText").textContent;
+    try{
+      if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(value)}
+      else{var area=document.createElement("textarea");area.value=value;area.style.position="fixed";area.style.opacity="0";document.body.appendChild(area);area.select();var ok=document.execCommand("copy");area.remove();if(!ok)throw new Error("Clipboard API unavailable")}
+      showModal("Identifier copied",value);
+    }catch(error){showModal("Copy unavailable","Select and copy this identifier manually:\n\n"+value)}
+  });
+  var output=el("termOutput");
+  function writeLine(text,kind){
+    var line=document.createElement("div");
+    line.className=kind||"";
+    line.textContent=text;
+    output.appendChild(line);
+  }
+  var commands={
+    help:function(){return "Commands: help, status, stack, genome, identity, deploy, clear\nThis is a browser console; shell operations run only in bin/nws on your device."},
+    status:function(){return "SITE: static HTML\nSOURCE: GitHub repository\nDEPLOY: connected Vercel Git integration\nLOCAL EXECUTION: not available in browser\nPURCHASE FLOW: checkout URLs not configured"},
+    stack:function(){return "SOURCE CONTROL  GitHub\nQUALITY GATE   Node.js check-site script + GitHub Actions\nHOSTING        Vercel Git deployment\nDEVICE CLI     bin/nws (Termux / Bash)\nPUBLISH        nws deploy → checks → safe commit → git push"},
+    genome:function(){return "PHI      = "+GENOME.PHI.toFixed(11)+"\nMOMENTUM = "+GENOME.MOMENTUM.toFixed(11)+"\nVECTOR   = "+GENOME.VECTOR.toFixed(11)+"\nCHAOS    = "+GENOME.CHAOS.toFixed(11)+"\nThese constants do not provide cryptographic security by themselves."},
+    identity:function(){return "Nathan Wayne Salles\nNode: 0x363\nDID label: did:nws:nathan-wayne-salles-01\nIdentity strings are metadata, not a standards-compliant DID proof."},
+    deploy:function(){return "A browser cannot run the device shell or safely push repository changes.\nOn your device, from this repository, run:\n\n  nws check\n  nws deploy\n\nThe CLI commits and pushes through Git; a linked Vercel project handles hosting."},
+    clear:function(){output.textContent="Terminal cleared. Type help for commands.";return null}
+  };
+  el("termForm").addEventListener("submit",function(event){
+    event.preventDefault();
+    var field=el("termInput"),raw=field.value.trim(),cmd=raw.toLowerCase();
+    if(!raw)return;
+    writeLine("guest@node-0x363:~$ "+raw,"green");
+    field.value="";
+    if(commands[cmd]){
+      var result=commands[cmd]();
+      if(result!==null)writeLine(result,"");
+    }else{writeLine("Unknown command: "+raw+". Type help.","muted")}
+    output.scrollTop=output.scrollHeight;
+  });
+  function updateSimulation(){
+    var rate=Number(el("mutationSlider").value)/100;
+    var chaos=GENOME.CHAOS*(1+(rate-.3)*.5);
+    var vector=GENOME.VECTOR*(1-(rate-.3)*.2);
+    el("rateValue").textContent=rate.toFixed(2);
+    el("rateBadge").textContent="Rate: "+Math.round(rate*100)+"%";
+    el("sigOutput").textContent="Sa11e3$::[PHI:"+GENOME.PHI.toFixed(4)+"]#[VECTOR:"+vector.toFixed(4)+"]#[CHAOS:"+chaos.toFixed(4)+"]";
+    el("simStatus").textContent=rate>.75?"Illustrative high-rate state · no code changed.":"Demo only · no source mutation performed.";
+  }
+  el("mutationSlider").addEventListener("input",updateSimulation);
+  updateSimulation();
+  Array.prototype.forEach.call(document.querySelectorAll(".productButton"),function(button){
+    button.addEventListener("click",function(){
+      showModal("Checkout not configured",button.getAttribute("data-product")+"\n\nNo live checkout URL has been supplied for this product. The button will not claim to purchase or reserve anything. Add a verified product checkout URL to the site configuration before enabling sales.");
+    });
+  });
+})();
+</script>
+</body>
+</html>

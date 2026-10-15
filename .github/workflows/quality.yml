@@ -1,0 +1,26 @@
+name: NWS Site Quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Check static site
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Set up Node.js
+        uses: actions/setup-node@1e60f620b9541dba9e7e59e5f5ea900f8d4f803a
+        with:
+          node-version: 22
+
+      - name: Validate website and local links
+        run: npm test

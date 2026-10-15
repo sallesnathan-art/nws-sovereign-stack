@@ -14,3 +14,6 @@ id_rsa
 credentials*.json
 service-account*.json
 .DS_Store
+
+# Local Netlify folder
+.netlify

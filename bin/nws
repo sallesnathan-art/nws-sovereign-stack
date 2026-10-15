@@ -1,0 +1,168 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+SCRIPT_PATH="$(readlink -f "$0")"
+ROOT="$(cd "$(dirname "$SCRIPT_PATH")/.." && pwd)"
+cd "$ROOT"
+
+GREEN='\033[0;32m'
+DIM='\033[0;90m'
+RESET='\033[0m'
+
+say() { printf '%b\n' "$*"; }
+fail() { say "\033[0;31mERROR:\033[0m $*" >&2; exit 1; }
+need() { command -v "$1" >/dev/null 2>&1 || fail "Missing command: $1"; }
+
+usage() {
+  cat <<'HELP'
+NWS CLI — Node 0x363
+
+Usage:
+  nws help                  Show this menu
+  nws status                Show repo, branch, commit, and working-tree status
+  nws check                 Validate the website and local references
+  nws build                 Run the static-site build check
+  nws local [port]          Serve the site at http://127.0.0.1:PORT
+  nws deploy                Check, safely stage, commit, and push the current branch
+  nws deploy --prod         Push production only when the current branch is main
+  nws update                Update the current branch (requires a clean working tree)
+  nws install               Install the nws command in ~/.local/bin
+
+Deployment model:
+  GitHub stores the source. A Vercel project linked to this repository publishes
+  commits pushed to main. Other branches can create preview deployments.
+
+Safety:
+  - Refuses an unexpected origin repository.
+  - Refuses common secret files and recognizable secret-token patterns.
+  - Never prints environment-variable values or requests deployment tokens.
+  - The browser console is not a shell; deployment runs here on your device.
+HELP
+}
+
+check_site() {
+  need node
+  node "$ROOT/scripts/check-site.mjs"
+}
+
+repo_status() {
+  say "${GREEN}NWS Sovereign Stack · Node 0x363${RESET}"
+  say "Root: $ROOT"
+  say "DID:  did:nws:nathan-wayne-salles-01"
+  if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    say "Git: repository metadata not found"
+    return 1
+  fi
+  say "Branch: $(git branch --show-current)"
+  say "Commit: $(git log -1 --format='%h %s' 2>/dev/null || printf 'no commits')"
+  say "Origin: $(git remote get-url origin 2>/dev/null || printf 'not configured')"
+  if git status --porcelain | grep -q .; then
+    say "Working tree: changes present"
+    git status --short
+  else
+    say "Working tree: clean"
+  fi
+  say "Site file: $([ -f "$ROOT/index.html" ] && printf 'present' || printf 'MISSING')"
+  say "CLI check: run 'nws check' for validation"
+}
+
+safe_origin() {
+  local origin
+  origin="$(git remote get-url origin 2>/dev/null)" || fail "Git remote 'origin' is not configured."
+  case "$origin" in
+    https://github.com/sallesnathan-art/nws-sovereign-stack|https://github.com/sallesnathan-art/nws-sovereign-stack.git|git@github.com:sallesnathan-art/nws-sovereign-stack.git|ssh://git@github.com/sallesnathan-art/nws-sovereign-stack.git)
+      ;;
+    *)
+      fail "Unexpected origin: $origin. This CLI is scoped to sallesnathan-art/nws-sovereign-stack."
+      ;;
+  esac
+}
+
+scan_staged_files() {
+  local bad_files
+  bad_files="$(git diff --cached --name-only | grep -Ei '(^|/)\.env$|(^|/)\.env\.(local|production|preview|development|test)(\.|$)|(^|/)\.vercel/|(^|/)\.npmrc$|(^|/)(credentials|service-account)[^/]*\.json$|(^|/)id_rsa$|\.(pem|p12|key)$' || true)"
+  if [ -n "$bad_files" ]; then
+    say "Refusing to commit sensitive-looking file paths:"
+    say "$bad_files"
+    fail "Move these files out of the repository or add them to .gitignore, then retry."
+  fi
+
+  if git diff --cached --no-ext-diff --unified=0 | grep -E '^\+.*(gh[pousr]_[A-Za-z0-9_]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-[A-Za-z0-9_-]{20,}|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----|AKIA[0-9A-Z]{16}|xox[baprs]-[A-Za-z0-9-]{10,})' >/dev/null; then
+    fail "A staged change resembles a secret or private key. Nothing was committed or pushed."
+  fi
+}
+
+deploy() {
+  need git
+  check_site
+  git rev-parse --is-inside-work-tree >/dev/null 2>&1 || fail "Run this inside the cloned NWS repository."
+  safe_origin
+
+  local branch
+  branch="$(git branch --show-current)"
+  [ -n "$branch" ] || fail "Detached HEAD; switch to a named branch first."
+  if [ "${1-}" = "--prod" ] && [ "$branch" != "main" ]; then
+    fail "Production deploy requires branch main. Current branch: $branch"
+  fi
+  if [ -n "${1-}" ] && [ "$1" != "--prod" ]; then
+    fail "Unknown deploy option: $1"
+  fi
+
+  git add -A
+  scan_staged_files
+  if ! git diff --cached --quiet; then
+    if ! git config user.name >/dev/null || ! git config user.email >/dev/null; then
+      fail "Set git user.name and user.email before using nws deploy."
+    fi
+    local stamp
+    stamp="$(date -u +%Y-%m-%dT%H%MZ)"
+    git commit -m "deploy: publish NWS site $stamp"
+  else
+    say "${DIM}No file changes to commit; pushing any local commits that are not remote yet.${RESET}"
+  fi
+
+  say "Pushing branch '$branch' to origin..."
+  git push -u origin "$branch"
+  if [ "$branch" = "main" ]; then
+    say "${GREEN}Push complete.${RESET} If Vercel Git integration is connected, this push triggers a production deployment."
+  else
+    say "${GREEN}Push complete.${RESET} If Vercel Git integration is connected, this branch can receive a preview deployment."
+    say "To publish production, switch to main, merge the reviewed changes, then run: nws deploy --prod"
+  fi
+}
+
+local_server() {
+  local port="${2-4173}"
+  case "$port" in
+    ''|*[!0-9]*) fail "Port must be a number between 1 and 65535." ;;
+  esac
+  [ "$port" -ge 1 ] && [ "$port" -le 65535 ] || fail "Port must be between 1 and 65535."
+  if command -v python3 >/dev/null 2>&1; then
+    exec python3 -m http.server "$port" --bind 127.0.0.1 --directory "$ROOT"
+  fi
+  fail "Python 3 is required for local preview. Install it with: pkg install python"
+}
+
+update_repo() {
+  need git
+  git rev-parse --is-inside-work-tree >/dev/null 2>&1 || fail "Run this inside the cloned repository."
+  [ -z "$(git status --porcelain)" ] || fail "Working tree is not clean. Commit or stash changes before updating."
+  local branch
+  branch="$(git branch --show-current)"
+  [ -n "$branch" ] || fail "Detached HEAD; switch to a branch first."
+  git pull --ff-only origin "$branch"
+  check_site
+}
+
+case "${1-help}" in
+  help|-h|--help) usage ;;
+  version|--version) printf 'nws 1.0.0 · Node 0x363\n' ;;
+  status) repo_status ;;
+  check) check_site ;;
+  build) check_site; say "Static site check passed. No bundler is required." ;;
+  local|serve) local_server "$@" ;;
+  deploy) shift; deploy "$@" ;;
+  update) update_repo ;;
+  install) bash "$ROOT/install.sh" ;;
+  *) usage; fail "Unknown command: $1" ;;
+esac
